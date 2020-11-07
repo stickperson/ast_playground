@@ -1,4 +1,5 @@
 import ast
+from fnmatch import fnmatch
 import os
 import unittest
 
@@ -24,14 +25,15 @@ class Inspector:
 
 
 class Application:
-    def __init__(self, start_directory='./tests', pattern='integration*'):
+    def __init__(self, changed_files, start_directory='./tests', pattern='integration*.py'):
+        self._changed_files = changed_files
         self._start_directory = start_directory
         self._pattern = pattern
         self._inspector_cls = Inspector
         self._loader_cls = unittest.TestLoader
         self._test_suite_cls = unittest.TestSuite
 
-        self._inspector = None
+        self._inspectors = []
         self._loader = None
         self._test_suite = None
         self._test_filenames = set()
@@ -41,10 +43,13 @@ class Application:
         Retrieves target classes from the inspector and inspects test files for
         imports of those classnames
         """
-        targets = self._inspector.report()
-        for root, subdirs, files in os.walk('./tests'):
+        targets = set()
+        for inspector in self._inspectors:
+            targets.update(inspector.report())
+
+        for root, subdirs, files in os.walk(self._start_directory):
             for f in files:
-                if f.startswith('integration_') and f.endswith('.py'):
+                if fnmatch(f, self._pattern):
                     full_path = os.path.join(root, f)
                     tree = ast.parse(open(full_path).read())
                     visitor = ImportFromVisitor(list(targets))
@@ -53,12 +58,14 @@ class Application:
                         self._test_filenames.add((root, f))
 
     def initialize(self):
-        self.make_inspector()
+        self.make_inspectors()
         self.make_loader()
         self.make_test_suite()
 
-    def make_inspector(self):
-        self._inspector = Inspector('./mycode/thing.py')
+    def make_inspectors(self):
+        for f in self._changed_files:
+            inspector = Inspector(f)
+            self._inspectors.append(inspector)
 
     def make_loader(self):
         self._loader = self._loader_cls()
@@ -69,13 +76,14 @@ class Application:
     def run(self):
         self.initialize()
 
-        self._run_inspector()
+        self._run_inspectors()
         self._find_matches()
         self._setup_tests()
         self._run_tests()
 
-    def _run_inspector(self):
-        self._inspector.inspect()
+    def _run_inspectors(self):
+        for inspector in self._inspectors:
+            inspector.inspect()
 
     def _run_tests(self):
         unittest.installHandler()
@@ -93,5 +101,5 @@ class Application:
 
 
 if __name__ == '__main__':
-    app = Application()
+    app = Application(['./mycode/thing.py'])
     app.run()
