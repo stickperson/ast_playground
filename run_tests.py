@@ -36,6 +36,22 @@ class Application:
         self._test_suite = None
         self._test_filenames = set()
 
+    def _find_matches(self):
+        """
+        Retrieves target classes from the inspector and inspects test files for
+        imports of those classnames
+        """
+        targets = self._inspector.report()
+        for root, subdirs, files in os.walk('./tests'):
+            for f in files:
+                if f.startswith('integration_') and f.endswith('.py'):
+                    full_path = os.path.join(root, f)
+                    tree = ast.parse(open(full_path).read())
+                    visitor = ImportFromVisitor(list(targets))
+                    visitor.visit(tree)
+                    if visitor.contains_target:
+                        self._test_filenames.add((root, f))
+
     def initialize(self):
         self.make_inspector()
         self.make_loader()
@@ -52,40 +68,21 @@ class Application:
 
     def run(self):
         self.initialize()
-        self.make_inspector()
-        self.make_loader()
-        self.make_test_suite()
 
-        self.run_inspector()
-        self.find_matches()
-        self.setup_tests()
-        self.run_tests()
+        self._run_inspector()
+        self._find_matches()
+        self._setup_tests()
+        self._run_tests()
 
-    def run_inspector(self):
+    def _run_inspector(self):
         self._inspector.inspect()
 
-    def run_tests(self):
+    def _run_tests(self):
         unittest.installHandler()
         runner = unittest.TextTestRunner()
         runner.run(self._test_suite)
 
-    def find_matches(self):
-        """
-        Retrieves target classes from the inspector and inspects test files for
-        imports of those classnames
-        """
-        targets = self._inspector.report()
-        for root, subdirs, files in os.walk('./tests'):
-            for f in files:
-                if f.startswith('integration_') and f.endswith('.py'):
-                    full_path = os.path.join(root, f)
-                    tree = ast.parse(open(full_path).read())
-                    visitor = ImportFromVisitor(list(targets))
-                    visitor.visit(tree)
-                    if visitor.contains_target:
-                        self._test_filenames.add((root, f))
-
-    def setup_tests(self):
+    def _setup_tests(self):
         """
         Discovers and loads tests
         """
