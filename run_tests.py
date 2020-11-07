@@ -70,6 +70,10 @@ class Application:
         runner.run(self._test_suite)
 
     def find_matches(self):
+        """
+        Retrieves target classes from the inspector and inspects test files for
+        imports of those classnames
+        """
         targets = self._inspector.report()
         for root, subdirs, files in os.walk('./tests'):
             for f in files:
@@ -82,6 +86,9 @@ class Application:
                         self._test_filenames.add((root, f))
 
     def setup_tests(self):
+        """
+        Discovers and loads tests
+        """
         for root, fname in self._test_filenames:
             module = self._loader.discover(root, fname)
             if module and module.countTestCases():
