@@ -11,3 +11,4 @@ Future work:
 - run tests in parallel
 - possibly only run tests if the class itself changed, not just other code in the file
 - remove hard-coded assumptions (though this is just a proof of concept and may be fine)
+- possibly move a lot of logic to plugins (see https://www.youtube.com/watch?v=fY3Y_xPKWNA)
