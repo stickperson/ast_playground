@@ -1,6 +1,8 @@
+import argparse
 import ast
 from fnmatch import fnmatch
 import os
+import sys
 import unittest
 
 from visitors import BaseClassVisitor, ImportFromVisitor
@@ -47,7 +49,7 @@ class Application:
         for inspector in self._inspectors:
             targets.update(inspector.report())
 
-        for root, subdirs, files in os.walk(self._start_directory):
+        for root, _, files in os.walk(self._start_directory):
             for f in files:
                 if fnmatch(f, self._pattern):
                     full_path = os.path.join(root, f)
@@ -101,5 +103,10 @@ class Application:
 
 
 if __name__ == '__main__':
-    app = Application(['./mycode/thing.py'])
+    parser = argparse.ArgumentParser()
+    parser.add_argument('files', nargs='+')
+    parser.add_argument('--start-directory', default='.')
+    parser.add_argument('--pattern', default='integration*.py')
+    args = parser.parse_args()
+    app = Application(args.files, start_directory=args.start_directory, pattern=args.pattern)
     app.run()

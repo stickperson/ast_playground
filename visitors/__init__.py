@@ -12,8 +12,25 @@ class BaseClassVisitor(ast.NodeVisitor):
         self.classes = set()
 
     def visit_ClassDef(self, node: ast.Call) -> None:
+        """
+        Checks if the the node inherits from self._base_class_name.
+
+        Note: currently, this only works if the base class is imported directly. E.g.
+        from mycode.base import BaseClass
+        class MyClass(BaseClass):
+            ...
+
+        would work while
+
+        from mycode import base
+        class MyClass(base.BaseClass):
+            ...
+
+        would not. Depending on how the class was imported (and maybe even if it is aliased), the instance of base in
+        node.bases will differ.
+        """
         for base in node.bases:
-            if base.id == self._base_class_name:
+            if isinstance(base, ast.Name) and base.id == self._base_class_name:
                 self.classes.add(node.name)
         self.generic_visit(node)
 
