@@ -1,9 +1,11 @@
 import argparse
 import ast
-from fnmatch import fnmatch
 import os
 import sys
 import unittest
+from fnmatch import fnmatch
+from symbol import typedargslist
+from typing import Any, List, Set, Tuple, Union
 
 from visitors import BaseClassVisitor, ImportFromVisitor
 
@@ -28,7 +30,13 @@ class Inspector:
 
 
 class Application:
-    def __init__(self, changed_files, base_class, start_directory='./tests', pattern='integration*.py'):
+    def __init__(
+        self,
+        changed_files: List[str],
+        base_class: str,
+        start_directory: str = './tests',
+        pattern:str ='integration*.py'
+    ):
         self._changed_files = changed_files
         self._base_class = base_class
         self._start_directory = start_directory
@@ -37,12 +45,12 @@ class Application:
         self._loader_cls = unittest.TestLoader
         self._test_suite_cls = unittest.TestSuite
 
-        self._inspectors = []
+        self._inspectors: List[Any] = []
         self._loader = None
         self._test_suite = None
-        self._test_filenames = set()
+        self._test_filenames: Set[Tuple[str, str]] = set()
 
-    def _find_matches(self):
+    def _find_matches(self) -> None:
         """
         Retrieves target classes from the inspector and inspects test files for
         imports of those classnames
@@ -61,23 +69,23 @@ class Application:
                     if visitor.contains_target:
                         self._test_filenames.add((root, f))
 
-    def initialize(self):
+    def initialize(self) -> None:
         self.make_inspectors()
         self.make_loader()
         self.make_test_suite()
 
-    def make_inspectors(self):
+    def make_inspectors(self) -> None:
         for f in self._changed_files:
             inspector = Inspector(f, self._base_class)
             self._inspectors.append(inspector)
 
-    def make_loader(self):
-        self._loader = self._loader_cls()
+    def make_loader(self) -> None:
+        self._loader = self._loader_cls()  # type: ignore
 
-    def make_test_suite(self):
-        self._test_suite = self._test_suite_cls()
+    def make_test_suite(self) -> None:
+        self._test_suite = self._test_suite_cls()  # type: ignore
 
-    def run(self):
+    def run(self) -> None:
         self.initialize()
 
         self._run_inspectors()
@@ -85,23 +93,24 @@ class Application:
         self._setup_tests()
         self._run_tests()
 
-    def _run_inspectors(self):
+    def _run_inspectors(self) -> None:
         for inspector in self._inspectors:
             inspector.inspect()
 
-    def _run_tests(self):
+    def _run_tests(self) -> None:
         unittest.installHandler()
         runner = unittest.TextTestRunner()
-        runner.run(self._test_suite)
+        runner.run(self._test_suite)  # type: ignore
 
-    def _setup_tests(self):
+    def _setup_tests(self) -> None:
         """
         Discovers and loads tests
         """
         for root, fname in self._test_filenames:
-            module = self._loader.discover(root, fname)
+            module = self._loader.discover(root, fname)  # type: ignore
             if module and module.countTestCases():
-                self._test_suite.addTests(module)
+                self._test_suite.addTests(module)  # type: ignore
+        return
 
 
 def main() -> int:
@@ -115,6 +124,7 @@ def main() -> int:
         args.files, args.base_class, start_directory=args.start_directory, pattern=args.pattern
     )
     app.run()
+    sys.exit(0)
 
 
 if __name__ == '__main__':

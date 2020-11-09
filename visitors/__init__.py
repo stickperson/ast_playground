@@ -1,5 +1,5 @@
 import ast
-from typing import List
+from typing import List, Set
 
 
 class BaseClassVisitor(ast.NodeVisitor):
@@ -9,9 +9,9 @@ class BaseClassVisitor(ast.NodeVisitor):
     def __init__(self, base_class_name: str) -> None:
         super().__init__()
         self._base_class_name = base_class_name
-        self.classes = set()
+        self.classes: Set[str] = set()
 
-    def visit_ClassDef(self, node: ast.Call) -> None:
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
         """
         Checks if the the node inherits from self._base_class_name.
 
@@ -42,7 +42,7 @@ class ImportFromVisitor(ast.NodeVisitor):
         self._targets = targets
         self.contains_target = False
 
-    def visit_ImportFrom(self, node: ast.Call) -> None:
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
         for name in node.names:
             if name.name in self._targets:
                 self.contains_target = True
