@@ -102,7 +102,7 @@ class Application:
                 self._test_suite.addTests(module)
 
 
-if __name__ == '__main__':
+def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('files', nargs='+')
     parser.add_argument('--start-directory', default='.')
@@ -110,3 +110,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     app = Application(args.files, start_directory=args.start_directory, pattern=args.pattern)
     app.run()
+
+
+if __name__ == '__main__':
+    main()
+    sys.exit(0)
