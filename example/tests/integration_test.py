@@ -1,4 +1,3 @@
-from time import sleep
 import unittest
 from example.code.thing import MyClass
 

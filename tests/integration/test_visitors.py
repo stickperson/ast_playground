@@ -1,5 +1,5 @@
 import ast
-from visitors import BaseClassVisitor, ImportFromVisitor
+from visitors import BaseClassVisitor
 
 
 class TestBaseClassVisitor:
@@ -13,6 +13,7 @@ class Direct(BaseClass):
 class Indirect(Direct):
     pass
     '''
+
     def test_direct_inheritance(self):
         tree = ast.parse(self.code)
         visitor = BaseClassVisitor('BaseClass')

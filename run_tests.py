@@ -4,8 +4,7 @@ import os
 import sys
 import unittest
 from fnmatch import fnmatch
-from symbol import typedargslist
-from typing import Any, List, Set, Tuple, Union
+from typing import Any, List, Set, Tuple
 
 from visitors import BaseClassVisitor, ImportFromVisitor
 
@@ -35,7 +34,7 @@ class Application:
         changed_files: List[str],
         base_class: str,
         start_directory: str = './tests',
-        pattern:str ='integration*.py'
+        pattern: str = 'integration*.py'
     ):
         self._changed_files = changed_files
         self._base_class = base_class
