@@ -12,13 +12,14 @@ class Inspector:
     """
     Looks at a file, returns a list of class names that inherit from Workflow class
     """
-    def __init__(self, fname):
+    def __init__(self, fname, base_class):
         self._fname = fname
+        self._base_class = base_class
         self._visitor = None
 
     def inspect(self):
         tree = ast.parse(open(self._fname).read())
-        self._visitor = BaseClassVisitor('Workflow')
+        self._visitor = BaseClassVisitor(self._base_class)
         self._visitor.visit(tree)
 
     def report(self):
@@ -27,8 +28,9 @@ class Inspector:
 
 
 class Application:
-    def __init__(self, changed_files, start_directory='./tests', pattern='integration*.py'):
+    def __init__(self, changed_files, base_class, start_directory='./tests', pattern='integration*.py'):
         self._changed_files = changed_files
+        self._base_class = base_class
         self._start_directory = start_directory
         self._pattern = pattern
         self._inspector_cls = Inspector
@@ -66,7 +68,7 @@ class Application:
 
     def make_inspectors(self):
         for f in self._changed_files:
-            inspector = Inspector(f)
+            inspector = Inspector(f, self._base_class)
             self._inspectors.append(inspector)
 
     def make_loader(self):
@@ -104,11 +106,14 @@ class Application:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument('base_class', help='Name of the target base class')
     parser.add_argument('files', nargs='+')
     parser.add_argument('--start-directory', default='.')
     parser.add_argument('--pattern', default='integration*.py')
     args = parser.parse_args()
-    app = Application(args.files, start_directory=args.start_directory, pattern=args.pattern)
+    app = Application(
+        args.files, args.base_class, start_directory=args.start_directory, pattern=args.pattern
+    )
     app.run()
 
 
