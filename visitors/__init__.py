@@ -42,7 +42,7 @@ class ImportFromVisitor(ast.NodeVisitor):
         self._targets = targets
         self.contains_target = False
 
-    def visit_ImportFrom(self, node) -> None:
+    def visit_ImportFrom(self, node: ast.Call) -> None:
         for name in node.names:
             if name.name in self._targets:
                 self.contains_target = True
