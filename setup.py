@@ -2,9 +2,9 @@ from setuptools import setup
 
 
 setup(
-    name='ast-playground',
+    name='test-finder',
     version='1',
     entry_points={
-        'console_scripts': ['ast-playground=run_tests:main']
+        'console_scripts': ['test-finder=run_tests:main']
     }
 )
