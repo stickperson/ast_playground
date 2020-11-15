@@ -1,6 +1,7 @@
 import argparse
 import ast
 import os
+import subprocess
 import sys
 import unittest
 from fnmatch import fnmatch
@@ -115,12 +116,17 @@ class Application:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('base_class', help='Name of the target base class')
-    parser.add_argument('files', nargs='+')
+    parser.add_argument('--files', nargs='+', default=None)
     parser.add_argument('--start-directory', default='.')
     parser.add_argument('--pattern', default='integration*.py')
     args = parser.parse_args()
+    files = args.files
+    if not files:
+        cmd = ['git', 'diff', '--name-only', '@{1}']
+        files = subprocess.check_output(cmd, encoding='utf8').split()
+        print(files)
     app = Application(
-        args.files, args.base_class, start_directory=args.start_directory, pattern=args.pattern
+        files, args.base_class, start_directory=args.start_directory, pattern=args.pattern
     )
     app.run()
     sys.exit(0)
