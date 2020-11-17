@@ -1,7 +1,7 @@
 import ast
 from unittest import mock
 
-from visitors import BaseClassVisitor, ImportFromVisitor
+from surveyor.visitors import BaseClassVisitor, ImportFromVisitor
 
 
 class TestBaseClassVisitor:

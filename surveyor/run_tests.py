@@ -7,7 +7,7 @@ import unittest
 from fnmatch import fnmatch
 from typing import Any, List, Set, Tuple
 
-from visitors import BaseClassVisitor, ImportFromVisitor
+from .visitors import BaseClassVisitor, ImportFromVisitor
 
 
 class Inspector:

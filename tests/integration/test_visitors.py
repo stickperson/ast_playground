@@ -1,5 +1,5 @@
 import ast
-from visitors import BaseClassVisitor
+from surveyor.visitors import BaseClassVisitor
 
 
 class TestBaseClassVisitor:
